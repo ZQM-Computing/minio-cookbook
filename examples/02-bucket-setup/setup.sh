@@ -4,23 +4,12 @@ set -euo pipefail
 
 : "${MINIO_ROOT_USER:?set MINIO_ROOT_USER}"
 : "${MINIO_ROOT_PASSWORD:?set MINIO_ROOT_PASSWORD}"
-: "${MC_CONFIG_DIR:=$(mktemp -d)}"
-CLEAN_CONFIG=0
-if [[ -z "${MC_CONFIG_DIR:-}" ]]; then
-  MC_CONFIG_DIR="$(mktemp -d)"
-  CLEAN_CONFIG=1
-fi
+TMP_DIR="$(mktemp -d)"
+trap 'rm -rf "$TMP_DIR"' EXIT
+MC_CONFIG_DIR="$TMP_DIR/mc"
+mkdir -p "$MC_CONFIG_DIR"
 # Keep this example's alias/credentials isolated from the user's normal mc config.
-if [[ -z "${MC_CONFIG_DIR:-}" ]]; then
-  echo "Could not establish an isolated mc config directory" >&2
-  exit 2
-fi
 mc_local() { mc --config-dir "$MC_CONFIG_DIR" "$@"; }
-
-cleanup() {
-  if [[ "$CLEAN_CONFIG" == 1 ]]; then rm -rf "$MC_CONFIG_DIR"; fi
-}
-trap cleanup EXIT
 
 mc_local alias set local http://127.0.0.1:9000 "$MINIO_ROOT_USER" "$MINIO_ROOT_PASSWORD"
 mc_local admin info local
