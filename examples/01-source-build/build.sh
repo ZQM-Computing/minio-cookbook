@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
-# Build the pinned MinIO source tag, then smoke-start a disposable local instance.
-# This example requires explicit credentials and binds only to loopback.
+# Build the pinned MinIO source tag and smoke-start a disposable loopback instance.
+# The source checkout, binary, data, and logs all live in one temporary directory.
 set -euo pipefail
 
 TAG="RELEASE.2025-10-15T17-29-55Z"
@@ -9,15 +9,9 @@ TAG="RELEASE.2025-10-15T17-29-55Z"
 [[ "${#MINIO_ROOT_USER}" -ge 3 ]] || { echo "MINIO_ROOT_USER must be at least 3 characters" >&2; exit 2; }
 [[ "${#MINIO_ROOT_PASSWORD}" -ge 8 ]] || { echo "MINIO_ROOT_PASSWORD must be at least 8 characters" >&2; exit 2; }
 
-ROOT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")/../.." && pwd)"
-cd "$ROOT_DIR"
-if [ ! -d minio-src ]; then
-  git clone --depth 1 --branch "$TAG" https://github.com/minio/minio.git minio-src
-fi
-cd minio-src
-go build -o ../minio .
-cd "$ROOT_DIR"
-./minio --version
+for tool in git go curl; do
+  command -v "$tool" >/dev/null 2>&1 || { echo "ERROR: required command not found: $tool" >&2; exit 127; }
+done
 
 TMP_DIR="$(mktemp -d)"
 SERVER_PID=""
@@ -30,9 +24,24 @@ cleanup() {
 }
 trap cleanup EXIT
 
+SOURCE_DIR="$TMP_DIR/minio-src"
+BINARY="$TMP_DIR/minio"
+git clone --depth 1 --branch "$TAG" https://github.com/minio/minio.git "$SOURCE_DIR"
+ACTUAL_TAG="$(git -C "$SOURCE_DIR" describe --tags --exact-match HEAD)"
+if [[ "$ACTUAL_TAG" != "$TAG" ]]; then
+  echo "ERROR: expected source tag $TAG, got $ACTUAL_TAG" >&2
+  exit 1
+fi
+
+(
+  cd "$SOURCE_DIR"
+  go build -o "$BINARY" .
+)
+"$BINARY" --version
+
 mkdir -p "$TMP_DIR/data"
 MINIO_ROOT_USER="$MINIO_ROOT_USER" MINIO_ROOT_PASSWORD="$MINIO_ROOT_PASSWORD" \
-  ./minio server "$TMP_DIR/data" \
+  "$BINARY" server "$TMP_DIR/data" \
   --address 127.0.0.1:9000 --console-address 127.0.0.1:9001 \
   >"$TMP_DIR/server.log" 2>&1 &
 SERVER_PID=$!
@@ -53,4 +62,4 @@ if [[ "$ready" != 1 ]]; then
   exit 1
 fi
 
-echo "PASS: MinIO is ready on loopback only; cleanup will stop the process."
+echo "PASS: MinIO built from $TAG and is ready on loopback only."
