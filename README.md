@@ -15,7 +15,7 @@ A **MinIO cookbook** for S3-compatible object storage from a source build. Patte
 
 ## Repository role and status
 
-**Status:** Active, public — first pattern pass written (design-only, gate 1 target; runtime validation pending). The table below lists what is written; no pattern has been runtime-validated yet.
+**Status:** Active, public — four design-stage examples. CI validates shell syntax and lifecycle JSON, plus security/fixture contracts. No example has been runtime-validated against the fleet MinIO build.
 
 **What this repository is:** MinIO patterns — see the table below.
 
@@ -37,24 +37,27 @@ Platform engineers who need S3-compatible storage without a cloud account.
 
 | # | Example | Status | What it demonstrates |
 |---|---------|--------|----------------------|
-| 01 | [01-source-build](examples/01-source-build/README.md) | Written (design-only) | Building MinIO from source when release downloads are unavailable |
-| 02 | [02-bucket-setup](examples/02-bucket-setup/README.md) | Written (design-only) | Buckets, policies, and console access (credentials in service env only, never in repos) |
-| 03 | [03-presigned](examples/03-presigned/README.md) | Written (design-only) | Presigned URLs for uploads and downloads |
-| 04 | [04-versioning-lifecycle](examples/04-versioning-lifecycle/README.md) | Written (design-only) | Versioning and lifecycle rules for raster and catalog assets |
+| 01 | [01-source-build](examples/01-source-build/README.md) | Written; runtime pending | Building MinIO from source when release downloads are unavailable |
+| 02 | [02-bucket-setup](examples/02-bucket-setup/README.md) | Written; runtime pending | Buckets, policies, and console access (credentials in service env only, never in repos) |
+| 03 | [03-presigned](examples/03-presigned/README.md) | Written; round-trip assertions added | Presigned URLs for uploads and downloads |
+| 04 | [04-versioning-lifecycle](examples/04-versioning-lifecycle/README.md) | Written; runtime pending | Versioning and lifecycle rules for raster and catalog assets |
 
 ## Repository layout
 
 ```text
 minio-cookbook/
-├── examples/          # pattern passes, landing in follow-up work
+├── examples/          # four design-stage patterns with runtime gates
+├── tests/             # script-safety and lifecycle fixture contracts
+└── .github/workflows/ # shell/JSON/contract CI
 ├── README.md
 └── LICENSE
 ```
 
 ## Roadmap
 
-- First pattern pass: the first two table rows
-- Second pass: the remaining rows, from fleet-verified setups
+- Validate the pinned source build and health endpoint on an isolated host.
+- Verify `mc` command syntax and bucket policy behavior against the selected MinIO client version.
+- Confirm presigned download/upload round trips and lifecycle rule behavior against the target server before production use.
 
 ## Contributing
 
