@@ -1,0 +1,1 @@
+{"Rules":[{"Expiration":{"Days":30},"Filter":{"Prefix":"staging/"},"ID":"expire-catalog-staging","Status":"Enabled"}]}

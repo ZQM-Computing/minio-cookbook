@@ -15,7 +15,7 @@ A **MinIO cookbook** for S3-compatible object storage from a source build. Patte
 
 ## Repository role and status
 
-**Status:** Active, public — seeding. Pattern passes land in follow-up work from fleet-verified setups; the tables below list what is planned, not what is already written.
+**Status:** Active, public — first pattern pass written (design-only, gate 1 target; runtime validation pending). The table below lists what is written; no pattern has been runtime-validated yet.
 
 **What this repository is:** MinIO patterns — see the table below.
 
@@ -33,14 +33,14 @@ Platform engineers who need S3-compatible storage without a cloud account.
 - Go toolchain for the build pass
 - Bash or PowerShell
 
-## Patterns (planned)
+## Patterns
 
-| # | Example | What it will demonstrate |
-|---|---------|--------------------------|
-| 01 | `01-source-build` | Building MinIO from source when release downloads are unavailable |
-| 02 | `02-bucket-setup` | Buckets, policies, and console access (credentials in service env only, never in repos) |
-| 03 | `03-presigned` | Presigned URLs for uploads and downloads |
-| 04 | `04-versioning-lifecycle` | Versioning and lifecycle rules for raster and catalog assets |
+| # | Example | Status | What it demonstrates |
+|---|---------|--------|----------------------|
+| 01 | [01-source-build](examples/01-source-build/README.md) | Written (design-only) | Building MinIO from source when release downloads are unavailable |
+| 02 | [02-bucket-setup](examples/02-bucket-setup/README.md) | Written (design-only) | Buckets, policies, and console access (credentials in service env only, never in repos) |
+| 03 | [03-presigned](examples/03-presigned/README.md) | Written (design-only) | Presigned URLs for uploads and downloads |
+| 04 | [04-versioning-lifecycle](examples/04-versioning-lifecycle/README.md) | Written (design-only) | Versioning and lifecycle rules for raster and catalog assets |
 
 ## Repository layout
 
