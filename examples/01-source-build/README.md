@@ -1,9 +1,10 @@
 # 01 — Source Build: MinIO When Downloads 410
 
 **Design-only — gate 1 target. Not runtime-validated.** This pattern builds
-MinIO from source at the fleet's tag, the route the fleet took after every
-release-download path returned 410. The source build is the pattern: clone the
-tag, build the server binary, and start it once against a scratch data dir.
+MinIO from source at the fleet's tag, the route the fleet took after release-download paths returned 410. The runner
+clones the exact tag, builds the server binary, and starts it against a scratch
+data directory. The checkout, binary, data, and logs are all temporary and are
+removed on exit.
 
 ## Prerequisites
 
@@ -27,14 +28,13 @@ bash build.sh
 - `minio --version` reports that tag (or a version string derived from it).
 - A scratch server started with `minio server` answers on its API port
   (:9000) and console port (:9001) — fleet ports — and then stops cleanly.
-- No data is written anywhere except the scratch data dir the script creates.
+- The source checkout, built binary, scratch data, and logs are all confined to the temporary directory and removed on exit; no build artifacts are left in the repository checkout.
 
 ## Failure behavior
 
 - A Go version too old for the tag's `go.mod` fails at build with a
   go-version error; the fix is the toolchain, not a source edit.
-- A dirty or partial clone (network drop mid-clone) fails the build with
-  missing-package errors; re-clone clean, do not patch around it.
+- A network interruption during clone/build fails the run; the cleanup trap removes the temporary checkout and binary, so retry from a clean start.
 - Port conflict on :9000/:9001: the smoke start fails to bind. Stop the
   existing server first — never run the smoke test against a production data
   dir.
