@@ -32,6 +32,13 @@ class MinioScriptSafetyContracts(unittest.TestCase):
         self.assertIn("--address 127.0.0.1:9000", script)
         self.assertIn("--console-address 127.0.0.1:9001", script)
         self.assertIn("trap cleanup EXIT", script)
+        self.assertIn('git clone --depth 1 --branch "$TAG"', script)
+        self.assertIn('git -C "$SOURCE_DIR" describe --tags --exact-match HEAD', script)
+        self.assertIn('go build -o "$BINARY" .', script)
+        self.assertIn('SOURCE_DIR="$TMP_DIR/minio-src"', script)
+        self.assertIn('BINARY="$TMP_DIR/minio"', script)
+        self.assertNotIn('minio-src"; then', script)
+        self.assertNotIn('go build -o ../minio', script)
         self.assertIn("for _ in $(seq 1 30)", script)
 
     def test_mc_credentials_use_temporary_config(self):
